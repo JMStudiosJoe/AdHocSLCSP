@@ -22,7 +22,6 @@ def find_plans_for_rate_area(zip_row, plans):
     rate_area_for_zip = zip_row['rate_area']
     plans = []
     for plan in plans:
-        import pdb; pdb.set_trace()
         if plan['rate_area'] == rate_area_for_zip:
             plans.append(plan)
 
@@ -31,7 +30,6 @@ def find_plans_for_rate_area(zip_row, plans):
 def find_plans_for_zip(zips, plans):
     rate_area_plans = []
     for zip_row in zips:
-        import pdb;pdb.set_trace()
         find_plans_for_rate_area(zip_row['rate_area'], plans)
 
         plans_for_zip.append(data)
