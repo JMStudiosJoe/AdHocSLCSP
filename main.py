@@ -33,7 +33,10 @@ class ZipsHandler():
     def __init__(self, all_zips, slcsp_zips):
         self.all_zips = all_zips
         self.looking_for_zips = []
-
+        for zip_row in all_zips:
+            zipcode = zip_row['zipcode']
+            if zipcode in slcsp_zips:
+                self.looking_for_zips.append(zip_row)
 
 
 class PlansHandler():
@@ -59,30 +62,28 @@ class PlansHandler():
 
 class SLCSPHandler():
 
-    def __init__(self, looking_for_zips, plans_handler, zips_handler):
+    def __init__(self, plans_handler, zips_handler):
         '''
         load the zips for slcps, the class for handling plans with already loaded silver plans
         zips_handler not used yet will see it soon
         '''
-        self.looking_for_zips = looking_for_zips
         self.plans_handler = plans_handler
-        self.zips_helper = zips_handler
+        self.zips_handler = zips_handler
 
-    def find_valid_slcsp_zips(self, zips, plans, looking_for_zips):
+    def find_valid_slcsp_zips(self):
         rate_area_rates = {}
-        for zip_row in zips:
+        for zip_row in self.zips_handler.looking_for_zips:
             zipcode = zip_row['zipcode']
-            if zipcode in looking_for_zips:
-                rate_area = zip_row['rate_area']
-                data = {
-                    'second_lowest_rate': self.plans_handler.find_second_min_rate_for_rate_area(rate_area),
-                    'zipcode': zipcode
-                }
-                try:
-                    if len(rate_area_rates[rate_area]) != 0:
-                        rate_area_rates[rate_area].append(data)
-                except Exception as e:
-                    rate_area_rates[rate_area] = [data]
+            rate_area = zip_row['rate_area']
+            data = {
+                'second_lowest_rate': self.plans_handler.find_second_min_rate_for_rate_area(rate_area),
+                'zipcode': zipcode
+            }
+            try:
+                if len(rate_area_rates[rate_area]) != 0:
+                    rate_area_rates[rate_area].append(data)
+            except Exception as e:
+                rate_area_rates[rate_area] = [data]
 
         return build_valid_zip_with_rates(rate_area_rates)
 
@@ -131,11 +132,11 @@ def find_second_min_rate_for_rate_area(rate_area_for_zip, plans):
     print('\n\n----------\n')
     return second_lowest_rate
 
-def find_valid_slcsp_zips(zips, plans, looking_for_zips):
+def find_valid_slcsp_zips(zips, plans, slcsp_zips_list):
     rate_area_rates = {}
     for zip_row in zips:
         zipcode = zip_row['zipcode']
-        if zipcode in looking_for_zips:
+        if zipcode in slcsp_zips_list:
             rate_area = zip_row['rate_area']
             data = {
                 'second_lowest_rate': find_second_min_rate_for_rate_area(rate_area, plans),
@@ -144,7 +145,7 @@ def find_valid_slcsp_zips(zips, plans, looking_for_zips):
             try:
                 if len(rate_area_rates[rate_area]) != 0:
                     rate_area_rates[rate_area].append(data)
-            except Exception as e:
+            except KeyError as e:
                 rate_area_rates[rate_area] = [data]
 
     return build_valid_zip_with_rates(rate_area_rates)
@@ -155,12 +156,19 @@ if __name__ == '__main__':
     zips_list = csv_handler.read_csv('./zips.csv')
     plans_list = csv_handler.read_csv('./plans.csv')
     slcsp_zips = csv_handler.read_csv('./slcsp.csv')
-    looking_for_zips = [find_zip['zipcode'] for find_zip in slcsp_zips]
+    slcsp_zips_list = [find_zip['zipcode'] for find_zip in slcsp_zips]
+
+    zips_handler = ZipsHandler(zips_list, slcsp_zips_list)
+    plans_handler = PlansHandler(plans_list)
+    slcsp_handler = SLCSPHandler(plans_handler, zips_handler)
+    valid_zip_data_class = slcsp_handler.find_valid_slcsp_zips()
+
     silver_plans = []
     for plan in plans_list:
         if plan['metal_level'] == 'Silver':
             silver_plans.append(plan)
 
-    valid_zip_data = find_valid_slcsp_zips(zips_list, silver_plans, looking_for_zips)
+    valid_zip_data = find_valid_slcsp_zips(zips_list, silver_plans, slcsp_zips_list)
+    import pdb; pdb.set_trace()
     csv_handler.write_to_csv('./slcsp_found.csv', valid_zip_data, slcsp_zips)
 
