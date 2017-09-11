@@ -9,7 +9,8 @@ class CSVHandler():
 
     def write_to_csv(self, path_to_csv, valid_zip_data, slcsp_zips):
         with open(path_to_csv, 'w') as slcsp_csv:
-            writer = csv.DictWriter(slcsp_csv, slcsp_zips[0].keys())
+            fieldnames = slcsp_zips[0].keys()[::-1]
+            writer = csv.DictWriter(slcsp_csv, fieldnames=fieldnames)
             writer.writeheader()
             for zip_data in slcsp_zips:
                 zipcode = zip_data['zipcode']
