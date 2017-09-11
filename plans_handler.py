@@ -1,9 +1,6 @@
 class PlansHandler():
-    def __init__(self, plans_list, metal_level='Silver'):
-        self.plans = []
-        for plan in plans_list:
-            if plan['metal_level'] == metal_level:
-                self.plans.append(plan)
+    def __init__(self, plans_list):
+        self.plans = plans_list
 
     def find_second_min_rate(self, rate_area):
         min_rate = self.plans[0]['rate']

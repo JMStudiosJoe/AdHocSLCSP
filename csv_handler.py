@@ -7,6 +7,15 @@ class CSVHandler():
             dict_reader = csv.DictReader(csv_file)
             return list(dict_reader)
 
+    def read_plans_csv(self, path_to_csv, metal_level = 'Silver'):
+        with open(path_to_csv) as csv_file:
+            dict_reader = csv.DictReader(csv_file)
+            plans = []
+            for plan in dict_reader:
+                if plan['metal_level'] == metal_level:
+                    plans.append(plan)
+            return plans
+
     def write_to_csv(self, path_to_csv, valid_zip_data, slcsp_zips):
         with open(path_to_csv, 'w') as slcsp_csv:
             fieldnames = slcsp_zips[0].keys()[::-1]
