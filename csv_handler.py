@@ -16,14 +16,14 @@ class CSVHandler():
                 try:
                     if valid_zip_data[zipcode]:
                         data = {
-                            'zipcode': zipcode,
-                            'rate': valid_zip_data[zipcode]
+                            'rate': valid_zip_data[zipcode],
+                            'zipcode': zipcode
                         }
                         writer.writerow(data)
 
                 except KeyError as e:
                     data = {
-                        'zipcode': zipcode,
-                        'rate': ''
+                        'rate': '',
+                        'zipcode': zipcode
                     }
                     writer.writerow(data)

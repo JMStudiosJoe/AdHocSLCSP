@@ -5,9 +5,10 @@ class PlansHandler():
             if plan['metal_level'] == metal_level:
                 self.plans.append(plan)
 
-    def find_second_min_rate_for_rate_area(self, rate_area):
+    def find_second_min_rate(self, rate_area):
         min_rate = self.plans[0]['rate']
-        second_lowest_rate = min_rate
+        offset_price = 300
+        second_lowest_rate = str(float(min_rate) + offset_price)
         for plan in self.plans:
             if plan['rate_area'] == rate_area:
                 if plan['rate'] < min_rate:
