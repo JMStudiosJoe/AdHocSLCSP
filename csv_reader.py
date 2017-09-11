@@ -18,23 +18,29 @@ class PlansHandler():
         self.all_plans = all_plans
 
 
-def find_plans_for_rate_area(zip_row, plans):
-    rate_area_for_zip = zip_row['rate_area']
-    plans = []
+def find_min_rate_for_rate_area(rate_area_for_zip, plans):
+    min_rate = plans[0]['rate']
     for plan in plans:
         if plan['rate_area'] == rate_area_for_zip:
-            plans.append(plan)
+            if plan['rate'] < min_rate:
+                min_rate = plan['rate']
 
-    return plans
+    return min_rate
 
 def find_plans_for_zip(zips, plans):
-    rate_area_plans = []
+    rate_area_rates = []
+    plans_for_zip = []
     for zip_row in zips:
-        find_plans_for_rate_area(zip_row['rate_area'], plans)
+        data = {
+            'rate_area': zip_row['rate_area'],
+            'min_rate': find_min_rate_for_rate_area(zip_row['rate_area'], plans),
+            'state': zip_row['state'],
+            'zip_code': zip_row['zipcode']
+        }
+        rate_area_rates.append(data)
 
-        plans_for_zip.append(data)
-
-
+    import pdb; pdb.set_trace()
+    return rate_area_plans
 # slcsp may not be found if silver plan not available in the area or if only one
 # cost in the area?
 
