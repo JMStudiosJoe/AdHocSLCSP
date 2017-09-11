@@ -16,4 +16,4 @@ if __name__ == '__main__':
     slcsp_handler = SLCSPHandler(plans_handler, zips_handler)
 
     valid_zip_data = slcsp_handler.find_valid_slcsp_zips()
-    csv_handler.write_to_csv('./slcsp_found.csv', valid_zip_data, slcsp_zips)
+    csv_handler.write_to_csv('./slcsp.csv', valid_zip_data, slcsp_zips)
