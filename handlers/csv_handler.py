@@ -16,6 +16,17 @@ class CSVHandler():
                     plans.append(plan)
             return plans
 
+    def read_slcsp_zips(self, path_to_csv, slcsp_zips):
+        with open(path_to_csv) as csv_file:
+            dict_reader = csv.DictReader(csv_file)
+            zips = []
+            for zip_row in dict_reader:
+                zipcode = zip_row['zipcode']
+                if zipcode in slcsp_zips:
+                    zips.append(zip_row)
+            return zips
+
+
     def write_to_csv(self, path_to_csv, valid_zip_data, slcsp_zips):
         with open(path_to_csv, 'w') as slcsp_csv:
             fieldnames = slcsp_zips[0].keys()[::-1]
