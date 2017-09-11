@@ -30,19 +30,23 @@ class CSVHandler():
 
 
 class ZipsHandler():
-    def __init__(self, all_zips, looking_for_zips):
+    def __init__(self, all_zips, slcsp_zips):
         self.all_zips = all_zips
-        self.looking_for_zips = looking_for_zips
+        self.looking_for_zips = []
+
 
 
 class PlansHandler():
-    def __init__(self, silver_plans):
-        self.silver_plans = silver_plans
+    def __init__(self, plans_list, metal_level='Silver'):
+        self.plans = []
+        for plan in plans_list:
+            if plan['metal_level'] == metal_level:
+                self.plans.append(plan)
 
     def find_second_min_rate_for_rate_area(self, rate_area):
-        min_rate = self.silver_plans[0]['rate']
+        min_rate = self.plans[0]['rate']
         second_lowest_rate = min_rate
-        for plan in self.silver_plans:
+        for plan in self.plans:
             if plan['rate_area'] == rate_area:
                 if plan['rate'] < min_rate:
                     min_rate = plan['rate']
@@ -51,6 +55,49 @@ class PlansHandler():
                     second_lowest_rate = plan['rate']
 
         return second_lowest_rate
+
+
+class SLCSPHandler():
+
+    def __init__(self, looking_for_zips, plans_handler, zips_handler):
+        '''
+        load the zips for slcps, the class for handling plans with already loaded silver plans
+        zips_handler not used yet will see it soon
+        '''
+        self.looking_for_zips = looking_for_zips
+        self.plans_handler = plans_handler
+        self.zips_helper = zips_handler
+
+    def find_valid_slcsp_zips(self, zips, plans, looking_for_zips):
+        rate_area_rates = {}
+        for zip_row in zips:
+            zipcode = zip_row['zipcode']
+            if zipcode in looking_for_zips:
+                rate_area = zip_row['rate_area']
+                data = {
+                    'second_lowest_rate': self.plans_handler.find_second_min_rate_for_rate_area(rate_area),
+                    'zipcode': zipcode
+                }
+                try:
+                    if len(rate_area_rates[rate_area]) != 0:
+                        rate_area_rates[rate_area].append(data)
+                except Exception as e:
+                    rate_area_rates[rate_area] = [data]
+
+        return build_valid_zip_with_rates(rate_area_rates)
+
+    def build_valid_zip_with_rates(rate_area_rates):
+        valid_min_for_zipcode = {}
+        for area in rate_area_rates.keys():
+            if len(rate_area_rates[area]) == 1:
+                zipcode = rate_area_rates[area][0]['zipcode']
+                rate = rate_area_rates[area][0]['second_lowest_rate']
+                valid_min_for_zipcode[zipcode] = rate
+
+        print(valid_min_for_zipcode)
+        return valid_min_for_zipcode
+
+
 
 
 
@@ -84,7 +131,7 @@ def find_second_min_rate_for_rate_area(rate_area_for_zip, plans):
     print('\n\n----------\n')
     return second_lowest_rate
 
-def find_plans_for_zip(zips, plans, looking_for_zips):
+def find_valid_slcsp_zips(zips, plans, looking_for_zips):
     rate_area_rates = {}
     for zip_row in zips:
         zipcode = zip_row['zipcode']
@@ -114,6 +161,6 @@ if __name__ == '__main__':
         if plan['metal_level'] == 'Silver':
             silver_plans.append(plan)
 
-    valid_zip_data = find_plans_for_zip(zips_list, silver_plans, looking_for_zips)
+    valid_zip_data = find_valid_slcsp_zips(zips_list, silver_plans, looking_for_zips)
     csv_handler.write_to_csv('./slcsp_found.csv', valid_zip_data, slcsp_zips)
 
